@@ -1,18 +1,18 @@
 # Consent / Contract Negotiating Agent
 
-The Consent/Contracts Negotiating Agent streamlines the process for individuals to set consent preferences regarding data usage, automates responses to consent requests from managers, and matches individuals with relevant services based on their consent profiles. Additionally, it assists organizations in negotiating and managing contractual agreements for data sharing within the dataspace ecosystem.
+The Consent/Contracts Negotiating Agent simplifies the process for data providers (individuals or organizations) to set data usage preferences, automates responses to (consent or contract) requests from other entities, such as request from managers for consent and request from use case orchestrators for contract, and matches data providers with relevant services based on their preference profiles. Additionally, it assists organization negotiate and manage contractual agreements for data sharing inside the dataspace ecosystem.
 
 Its components encompass consent preference settings, service matching capabilities, communication with consent managers, contract profile management, and the provision for organizations to define default rules and conditions for contractual agreements.
 
 ## Technical usage scenarios & Features
 
-The Consent/Contracts Negotiating Agent empowers individuals and data providers to manage consent preferences, discover suitable services, and negotiate data sharing agreements within dataspace ecosystems. It facilitates automatic matching and recommendation processes based on an individual's consent profile and organizations' data sharing agreements.
+The Consent/Contracts Negotiating Agent empowers individuals and data providers to manage data sharing preferences, discover suitable services, and negotiate data sharing agreements within dataspace ecosystems. It facilitates automatic matching and recommendation processes based on an individual's consent profile and organizations' data sharing agreements.
 
 ### Features/main functionalities
 
 - Empowers individuals to set consent preferences for data usage.
-- Automatic matching and recommendation process based on consent profiles and data sharing agreements.
-- Communication with consent managers to handle consent requests and responses.
+- Automatic matching and recommendation process based on consent preferences or contract profiles.
+- Communication with consent/contract managers to handle (consent & contract) requests and responses.
 - Integration with dataspace ecosystems to ensure compatibility with ecosystem conditions.
 - Provision for organizations to define default rules and conditions for contractual agreements.
 
@@ -22,13 +22,14 @@ The Consent/Contracts Negotiating Agent empowers individuals and data providers 
 - Facilitate automatic matching of individuals' consent profiles with the conditions of dataspace ecosystems.
 - Recommend the best services to individuals based on their needs and the permissibility of the data.
 - Streamline the process of handling consent requests and responses between individuals and consent managers.
+- Simplify the process of contract finalization with contract managers based on data provider contract profiles.
 - Provide organizations with the capability to establish default rules and conditions for contractual agreements, ensuring compliance and consistency.
 
 ## Requirements
 
 * MUST enable individuals to set and manage consent preferences for data usage.
 * MUST facilitate automatic matching and recommendation processes based on consent profiles and organizations' data sharing agreements.
-* MUST communicate effectively with consent managers to handle consent requests and responses.
+* MUST communicate effectively with consent or contract managers to handle requests and responses.
 * MUST integrate seamlessly with dataspace ecosystems to ensure compatibility with ecosystem conditions.
 * MUST provide configuration options for organizations to define default rules and conditions for contractual agreements.
 * SHOULD be able to process both bilateral and data space use case data sharing agreements.
@@ -54,6 +55,8 @@ This building block is not aimed to have a connector integration as it will be i
 It will however be a source of data exchange trigger which will enable the Consent service to notify the connectors of the data exchange following the protocol defined in the consent building block.
 
 ## Relevant Standards
+- [Binding:https](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol/contract-negotiation/contract.negotiation.binding.https#contract-negotiation-https-binding) RESTful API over HTTPS for the Contract Negotiation Protocol.
+- [uniform resource identifier(URI)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol/contract-negotiation/contract.negotiation.protocol) for the unique identifier ID of the offer and agreement condition.
 
 ### Data Format Standards
 
