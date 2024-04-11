@@ -11,7 +11,7 @@ The Consent/Contracts Negotiating Agent empowers individuals and data providers 
 ### Features/main functionalities
 
 - Empowers individuals to set consent preferences for data usage.
-- Automatic matching and recommendation process based on consent profiles and data sharing agreements.
+- Automatic matching and recommendation process based on consent preferences or contract profiles.
 - Communication with consent/contract managers to handle (consent & contract) requests and responses.
 - Integration with dataspace ecosystems to ensure compatibility with ecosystem conditions.
 - Provision for organizations to define default rules and conditions for contractual agreements.
@@ -22,7 +22,7 @@ The Consent/Contracts Negotiating Agent empowers individuals and data providers 
 - Facilitate automatic matching of individuals' consent profiles with the conditions of dataspace ecosystems.
 - Recommend the best services to individuals based on their needs and the permissibility of the data.
 - Streamline the process of handling consent requests and responses between individuals and consent managers.
-- Simplify the process of contract finalization with contract managers based on data provider contract preferences.
+- Simplify the process of contract finalization with contract managers based on data provider contract profiles.
 - Provide organizations with the capability to establish default rules and conditions for contractual agreements, ensuring compliance and consistency.
 
 ## Requirements
