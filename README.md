@@ -1,23 +1,72 @@
-# Consent/Contracts Negotiating Agent
+# Contract-Consent Agent
 
 ## Overview
 
-The Consent/Contracts Agent is a comprehensive library designed to seamlessly integrate with the contract-manager and consent-manager. It offers a range of features, including the automatic creation and management of profiles, automation of processes, personalized recommendations, and the ability to set and manage profile preferences. Additionally, the agent provides a robust routing system to facilitate the efficient flow of these functionalities.
+The **Contract-Consent Agent** is a library designed to integrate seamlessly with the **contract-manager** and **consent-manager**. It facilitates consent and contract profile management, negotiation automation, and personalized recommendations while providing a robust routing system for efficient operation.
 
-## Design Document
-See the design document [here](docs/design-document.md).
+The design document for this project can be found [here](./docs/design-document.md).
 
 ## Features
 
-- **Consent Profile Management**: Enables profiles for users in the consent-manager.
-- **Contract Profile Management**: Enables profiles for contract-manager.
-- **Contract Negotiation Management**: Enables organizations to define default rules and conditions for negotiation.
+- **Consent Profile Management**: Enables user profiles in the consent-manager.
+- **Contract Profile Management**: Enables contract profiles for organizations.
+- **Contract Negotiation Management**: Automates negotiation rules and conditions.
+- **DataProvider Configuration**: Supports configuration for managing profiles and data.
 
-## Configuration instructions
+## Usage
 
-### Example Configuration
+The **Contract-Consent Agent** is a library meant to be integrated into projects such as:
 
-Here’s an example of a JSON configuration:
+- [Consent Manager](https://github.com/Prometheus-X-association/consent-manager)
+- [Contract Manager](https://github.com/Prometheus-X-association/contract-manager)
+
+### Integration Guide
+
+1. Install the library:
+
+   ```bash
+   npm install https://gitpkg.now.sh/Prometheus-X-association/contract-consent-agent?VERSION
+   ```
+
+2. Create the config file and add your settings.
+
+3. Initialize the library in your `main.ts`:
+
+   ```typescript
+   import { Agent, ConsentAgent } from 'contract-agent';
+   import path from 'path';
+   import fs from 'fs';
+
+   const configFilePath = path.resolve(
+     __dirname,
+     '../consent-agent.config.json',
+   );
+   if (fs.existsSync(configFilePath)) {
+     Agent.setConfigPath('../consent-agent.config.json', __filename);
+     Agent.setProfilesHost('profiles');
+     await ConsentAgent.retrieveService();
+   }
+   ```
+
+4. Add the required router in your project:
+
+   ```typescript
+   import { ConsentAgentRouter } from 'contract-agent';
+
+   app.use('/consents', consentRouter);
+   app.use('/', verifyUserJWT, ConsentAgentRouter);
+   ```
+
+#### Configuration file
+
+The configuration file (`contract-agent.config.json`) defines settings to be used by the library instance where it is installed. Below is an example:
+
+- **source**: The name of the target collection or table that the DataProvider connects to.
+- **url**: The base URL of the database host.
+- **dbName**: The name of the database to be used.
+- **watchChanges**: A boolean that enables or disables change monitoring for the DataProvider. When enabled, events will be fired upon detecting changes.
+- **hostsProfiles**: A boolean indicating whether the DataProvider hosts the profiles.
+- **existingDataCheck**: A boolean that enables the creation of profiles when the module is initialized.
 
 ```json
 {
@@ -30,172 +79,76 @@ Here’s an example of a JSON configuration:
 }
 ```
 
-See more [here](./contract-agent/README.md)
+## Building and Testing
 
-## Building instructions
+To build the project or test it independently, you can clone this repository.
 
-To build le library you can use
-
-`npm run build` 
-
-## Running instructions
-The contract/consent agent is a library, so you can't run it, but it's purpose it's to be installed and use in the contract-manager and consent-manager
-
-### Consent integration step guide
-1. Install the contract-consent-agent
-```bash
-npm install https://gitpkg.now.sh/Prometheus-X-association/contract-consent-agent/contract-agent?VERSION
-```
-
-2. Create the config file and add your information ([documentation](./contract-agent/README.md))
-
-3. Initialise the library at your main.ts
-
-```typescript
-import express, { json as expressJson } from "express";
-import { loadRoutes } from "./routes";
-import path from "path";
-import fs from "fs";
-
-// Simulation
-import { Agent, ConsentAgent } from "contract-agent";
-
-export const startServer = async () => {
-
-  const app = express();
-  const port = testPort || process.env.PORT || 3000;
-
-  //Consent Agent exemple setup
-  const configFilePath = path.resolve(
-    __dirname,
-    agentConfigPath ?? "../consent-agent.config.json"
-  );
-  if (fs.existsSync(configFilePath)) {
-    Agent.setConfigPath(
-      agentConfigPath ?? "../consent-agent.config.json",
-      __filename
-    );
-    Agent.setProfilesHost("profiles");
-    await ConsentAgent.retrieveService();
-  }
-
-  loadRoutes(app);
-
-  // Start the server
-  const server = app.listen(port, () => {
-    //eslint-disable-next-line
-    console.log(`Consent manager running on: http://localhost:${port}`);
-  });
-
-  return { server, app }; // For tests
-};
-
-```
-4. Add the needed router into your project router
-```typescript
-//router.ts
-import { Application, Request, Response } from "express";
-
-// Routes
-import consentRouter from "./consent";
-import { ConsentAgentRouter } from "contract-agent";
-
-const API_PREFIX = process.env.API_PREFIX;
-
-export const loadRoutes = (app: Application) => {
-  app.get("/health", (req: Request, res: Response) => {
-    res.json({ status: "OK" });
-  });
-
-  app.use(API_PREFIX + "/consents", consentRouter);
-  app.use(API_PREFIX + "/", verifyUserJWT, ConsentAgentRouter);
-};
-
-```
-## Technical Usage Scenarios
-
-- Individuals can manage their consent preferences effectively.
-- Organizations can streamline the negotiation process for data sharing agreements.
-- Automatic recommendations for services based on consent profiles and contract profiles.
-
-## API Documentation
-
-The API for the Consent/Contracts Negotiating Agent is documented using Swagger. You can find the API routes and their descriptions in the `swagger.json` file located in the `contract-agent/docs` directory.
-
-You can use the following command to generate the swagger.json
+### Build the Project
 
 ```bash
-npm run swagger
-```
-### Example API Endpoints
-
-- **Get data exchanges recommendations**: `GET /profile/{profileId}/recommendations/consent`
-- **Set Preferences**: `POST /profile/{profileId}/preferences`
-- **Get Preferences**: `GET /profile/{profileId}/preferences`
-- **Negotiate Contract**: `POST /negotiation/contract/negotiate`
-
-### Example usage
-
-Send the following requests to the designated endpoints:
-
-![Example Usage 1](./docs/example_usage1.png)
-![Example Usage 2](./docs/example_usage2.png)
-![Example Usage 3](./docs/example_usage3.png)
-
-## Integrations
-
-### Direct Integrations with Other Building Blocks
-
-- [Consent Manager](https://github.com/Prometheus-X-association/consent-manager)
-- [Contract Manager](https://github.com/Prometheus-X-association/contract-manager)
-
-### Standards
-
-- **Data Format Standards**: JSON-LD, ISO 3166-1 alpha-2, ISO 8601, ODRL
-
-## Architecture
-
-The architecture consists of several key components:
-
-1. **Contract Agent**: Manages contract profiles of organizations and facilitates contract negotiations.
-2. **Consent Agent**: Manages consent preferences of individuals and automates responses to consent requests.
-
-## Logging and Operations
-
-The agent logs operations, errors, and warnings to facilitate troubleshooting and debugging. It also imposes limits and usage constraints to ensure efficient operation.
-
-## Testing and instructions
-
-The testing strategy includes unit tests, integration tests, and UI tests to ensure the correctness and reliability of functionalities.
-
-### Generate Test Reports for Contract Agent
-```bash
-pnpm report-cca-contract
+pnpm build
 ```
 
-### Generate Test Reports for Consent Agent
-```bash
-pnpm report-cca-consent
-```
+### Run Tests
 
-### Run Full Test Suite
+To run tests, you are going to need a mongo database
+
 ```bash
 pnpm test
 ```
 
-See more [here](./contract-agent/README.md) for instructions.
+#### Independent Tests
 
-## Usage in the Dataspace
+```bash
+pnpm test-cca-contract
+pnpm test-cca-consent
+```
 
-The Consent/Contracts Negotiating Agent enhances data usage and sharing agreements management, ensuring compliance with policies and streamlining processes for individuals and organizations.
+#### Generate Test Reports
 
-## License
+```bash
+pnpm report-cca-contract
+pnpm report-cca-consent
+```
 
-This project is licensed under the MIT License.
+## API Documentation
+
+The API is documented using Swagger. To generate `swagger.json`, run:
+
+```bash
+npm run swagger
+```
+
+> The swagger.json file can also be found [here](./docs/swagger.json)
+
+### Example Endpoints
+
+- **Get Recommendations**: `GET /profile/{profileId}/recommendations/consent`
+- **Set Preferences**: `POST /profile/{profileId}/preferences`
+- **Negotiate Contract**: `POST /negotiation/contract/negotiate`
+
+## Architecture
+
+The system consists of:
+
+1. **Contract Agent**: Manages contract profiles and automates negotiation.
+2. **Consent Agent**: Handles consent preferences and automates responses.
+
+## Standards & Compliance
+
+The library supports:
+
+- **Data Standards**: JSON-LD, ISO 3166-1 alpha-2, ISO 8601, ODRL
+- **Logging & Debugging**: Logs operations, errors, and warnings for easy troubleshooting.
 
 ## Contributing
 
-Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
+Contributions are welcome! Submit a pull request or open an issue for enhancements or bug fixes.
+
+## License
+
+This project is licensed under the **MIT License**.
 
 ## Contact
+
 For more information, please contact the project maintainers.
