@@ -6,6 +6,8 @@ The **Contract-Consent Agent** is a library designed to integrate seamlessly wit
 
 The design document for this project can be found [here](./docs/design-document.md).
 
+Although the design document displays example endpoints for the library, they are not meant to be used independently without context. Endpoints related to contracts should be tested within the [contract-manager](https://github.com/prometheus-x-association/contract-manager), while those for consents and consent profiles are active within the [consent-manager](https://github.com/prometheus-x-association/consent-manager).
+
 ## Features
 
 - **Consent Profile Management**: Enables user profiles in the consent-manager.
@@ -21,6 +23,10 @@ The **Contract-Consent Agent** is a library meant to be integrated into projects
 - [Contract Manager](https://github.com/Prometheus-X-association/contract-manager)
 
 ### Integration Guide
+
+#### Requirements
+
+The library works in projects built on [express](https://www.npmjs.com/package/express) as it extends the routers with additionnal endpoints. It is also required for the project to have a `Mongo` database to feed into the library.
 
 1. Install the library:
 
@@ -61,12 +67,14 @@ The **Contract-Consent Agent** is a library meant to be integrated into projects
 
 The configuration file (`contract-agent.config.json`) defines settings to be used by the library instance where it is installed. Below is an example:
 
-- **source**: The name of the target collection or table that the DataProvider connects to.
-- **url**: The base URL of the database host.
-- **dbName**: The name of the database to be used.
-- **watchChanges**: A boolean that enables or disables change monitoring for the DataProvider. When enabled, events will be fired upon detecting changes.
-- **hostsProfiles**: A boolean indicating whether the DataProvider hosts the profiles.
-- **existingDataCheck**: A boolean that enables the creation of profiles when the module is initialized.
+| Parameter         | Description                                                                                                                                           |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **source**        | The name of the target collection or table that the DataProvider connects to.                                                                         |
+| **url**           | The base URL of the database host.                                                                                                                   |
+| **dbName**        | The name of the database to be used.                                                                                                                 |
+| **watchChanges**  | A boolean that enables or disables change monitoring for the DataProvider. When enabled, events will be fired upon detecting changes.                 |
+| **hostsProfiles** | A boolean indicating whether the DataProvider hosts the profiles.                                                                                   |
+| **existingDataCheck** | A boolean that enables the creation of profiles when the module is initialized.                                                                    |
 
 ```json
 {
