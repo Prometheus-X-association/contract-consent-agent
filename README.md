@@ -185,6 +185,16 @@ pnpm test
 
 See more [here](./contract-agent/README.md) for instructions.
 
+### Unit testing
+#### Setup test environment
+#### Run tests
+#### Expected results
+
+### Component-level testing
+#### Setup test environment
+#### Run tests
+#### Expected results
+
 ## Usage in the Dataspace
 
 The Consent/Contracts Negotiating Agent enhances data usage and sharing agreements management, ensuring compliance with policies and streamlining processes for individuals and organizations.
