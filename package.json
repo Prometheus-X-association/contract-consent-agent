@@ -1,0 +1,14 @@
+{
+  "name": "contract-agent",
+  "version": "1.0.1",
+  "description": "Contract-Consent Agent Library",
+  "main": "./contract-agent/dist/index.js",
+  "module": "./contract-agent/dist/index.mjs",
+  "types": "./contract-agent/dist/index.d.ts",
+  "files": [
+    "contract-agent/dist"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
