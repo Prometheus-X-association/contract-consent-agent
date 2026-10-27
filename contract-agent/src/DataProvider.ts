@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
 import { FilterCondition, SearchCriteria } from './types';
 
-export type DataProviderType = { new (...args: any[]): DataProvider };
+export type DataProviderType = new (...args: any[]) => DataProvider;
 
 export abstract class DataProvider extends EventEmitter {
-  static childType?: DataProviderType;
+  private static childType?: DataProviderType;
 
   // eslint-disable-next-line no-unused-vars
   constructor(public dataSource: string) {
@@ -45,7 +45,9 @@ export abstract class DataProvider extends EventEmitter {
     return new DataProvider.childType();
   }
 
-  async ensureReady(): Promise<void> {}
+  async ensureReady(): Promise<void> {
+    // no-op by default: providers needing a connection override this method
+  }
 
   protected abstract makeQuery(
     // eslint-disable-next-line no-unused-vars

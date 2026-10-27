@@ -17,6 +17,9 @@ import { ChangeStreamDataProvider } from './ChangeStreamDataProvider';
 import axios from 'axios';
 import { ObjectId } from 'mongodb';
 
+/** Consent statuses for which the consent is withdrawn from the profiles */
+const WITHDRAWN_CONSENT_STATUSES = ['revoked', 'refused', 'terminated'];
+
 export class ConsentAgent extends Agent {
   private static instance: ConsentAgent | null = null;
 
@@ -98,7 +101,7 @@ export class ConsentAgent extends Agent {
       });
     } catch (error) {
       Logger.error(`Error while finding profile: ${(error as Error).message}`);
-      throw new Error();
+      throw new Error('Failed to find profiles');
     }
   }
 
@@ -125,7 +128,7 @@ export class ConsentAgent extends Agent {
       });
     } catch (error) {
       Logger.error(`Error while finding profile: ${(error as Error).message}`);
-      throw new Error();
+      throw new Error('Failed to find profile');
     }
   }
 
@@ -156,7 +159,7 @@ export class ConsentAgent extends Agent {
       });
     } catch (error) {
       Logger.error(`Error while finding profile: ${(error as Error).message}`);
-      throw new Error();
+      throw new Error('Failed to update profile');
     }
   }
 
@@ -187,7 +190,7 @@ export class ConsentAgent extends Agent {
       });
     } catch (error) {
       Logger.error(`Error while finding profile: ${(error as Error).message}`);
-      throw new Error();
+      throw new Error('Failed to push data to profile');
     }
   }
 
@@ -218,7 +221,7 @@ export class ConsentAgent extends Agent {
       });
     } catch (error) {
       Logger.error(`Error while finding profile: ${(error as Error).message}`);
-      throw new Error();
+      throw new Error('Failed to pull data from profile');
     }
   }
 
@@ -299,7 +302,7 @@ export class ConsentAgent extends Agent {
    * @param data - Data change event.
    */
   protected async handleDataUpdated(data: DataChangeEvent): Promise<void> {
-    if (data.updateDescription && data.updateDescription.updatedFields && data.updateDescription.updatedFields instanceof Object) {
+    if (data.updateDescription?.updatedFields instanceof Object) {
       switch (data.source) {
         case 'users':
           {
@@ -319,13 +322,7 @@ export class ConsentAgent extends Agent {
         case 'consents':
           {
             try {
-              const { updatedFields } = data.updateDescription as any
-              //watch for revoked consent
-              if (updatedFields.status && (updatedFields.status === 'revoked' || updatedFields.status === 'refused' || updatedFields.status === 'terminated')) {
-                //update profiles
-                //remove element from profiles
-                await this.handleRemoveConsent({ _id: data.documentKey?._id });
-              }
+              await this.handleConsentStatusUpdate(data);
               Logger.info(`Data updated for source: ${data.source}`);
             } catch (error) {
               Logger.error(
@@ -338,6 +335,20 @@ export class ConsentAgent extends Agent {
       }
     } else {
       Logger.info(`Unhandled data for source: ${data.source}`);
+    }
+  }
+
+  /**
+   * Removes a consent from the profiles when its status becomes withdrawn
+   * @param data - Data change event on a consent
+   */
+  private async handleConsentStatusUpdate(data: DataChangeEvent): Promise<void> {
+    const { updatedFields } = data.updateDescription as any;
+    //watch for revoked consent
+    if (WITHDRAWN_CONSENT_STATUSES.includes(updatedFields.status)) {
+      //update profiles
+      //remove element from profiles
+      await this.handleRemoveConsent({ _id: data.documentKey?._id });
     }
   }
 

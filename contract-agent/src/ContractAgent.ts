@@ -18,9 +18,7 @@ import { RecommendationService } from './RecommendationService';
 import { randomUUID } from 'crypto';
 import { setTimeout } from 'timers';
 
-interface WaitFunction {
-  (_ms: number): Promise<void>;
-}
+type WaitFunction = (_ms: number) => Promise<void>;
 
 export const wait: WaitFunction = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -160,7 +158,9 @@ export class ContractAgent extends Agent {
     this.signalUpdate();
   }
 
-  signalUpdate(): void {}
+  signalUpdate(): void {
+    // no-op by default: hook called once the profiles are updated from a contract change
+  }
 
   /**
    * Updates profiles for all contract members
@@ -300,7 +300,7 @@ export class ContractAgent extends Agent {
    * Handles deleted data events
    * @param data - Data change event
    */
-  protected handleDataDeleted(data: DataChangeEvent): void {
+  protected async handleDataDeleted(data: DataChangeEvent): Promise<void> {
     if (data.source === 'contracts') {
       Logger.info(`Removing contract: ${data.documentKey?._id}`);
     } else {

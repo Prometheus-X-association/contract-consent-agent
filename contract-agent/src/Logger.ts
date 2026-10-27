@@ -36,7 +36,7 @@ const Colors = {
  * Logger class for logging messages to the console and optionally to disk.
  */
 export class Logger {
-  private static noPrint: boolean = false; // Flag to disable console output
+  private static readonly noPrint: boolean = false; // Flag to disable console output
 
   private static config: LoggerConfig = {
     preserveLogs: false,

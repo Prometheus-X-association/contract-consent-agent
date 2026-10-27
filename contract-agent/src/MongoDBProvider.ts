@@ -16,7 +16,7 @@ type DocumentChangeHandler = (collectionName: string, document: any) => void;
 
 class MongoInterceptor {
   private static instance: MongoInterceptor;
-  private callbacks: Map<string, DocumentChangeHandler[]>;
+  private readonly callbacks: Map<string, DocumentChangeHandler[]>;
 
   private constructor() {
     this.callbacks = new Map();
@@ -55,20 +55,30 @@ export class MongoDBProvider extends DataProvider {
   findAll(): Promise<any[]> {
     throw new Error('Method not implemented.');
   }
-  private static connections: Map<
+  private static readonly connections: Map<
     string,
     { db: Db; client: MongoClient } | undefined
   > = new Map();
   private db?: Db;
   private client?: MongoClient;
   private collection!: Collection<Document>;
-  private dbName: string;
+  private readonly dbName: string;
+  private readonly url: string;
   private connectionPromise?: Promise<Db>;
 
   constructor(config: DataProviderConfig) {
     super(config.source);
     this.dbName = config.dbName;
-    this.connectionPromise = this.connectToDatabase(config.url);
+    this.url = config.url;
+  }
+
+  /**
+   * Connects to the database on first call and reuses the same connection afterwards
+   * @returns Promise resolving to the database
+   */
+  private connect(): Promise<Db> {
+    this.connectionPromise ??= this.connectToDatabase(this.url);
+    return this.connectionPromise;
   }
 
   getClient(): MongoClient | undefined {
@@ -129,7 +139,7 @@ export class MongoDBProvider extends DataProvider {
   }
 
   async ensureReady(collection?: Collection<Document>): Promise<void> {
-    await this.connectionPromise;
+    await this.connect();
     this.collection = MongoDBProvider.createCollectionProxy(
       collection || this.db!.collection(this.dataSource),
     );
@@ -409,10 +419,12 @@ export class MongoDBProvider extends DataProvider {
 
   async findOneAndPush(criteria: SearchCriteria, data: any): Promise<any> {
     const query = this.makeQuery(criteria.conditions);
-    Object.keys(data).map((key: string) => {
-      data[key].map((element: { _id: ObjectId; }) => element._id = new ObjectId());
+    Object.keys(data).forEach((key: string) => {
+      data[key].forEach((element: { _id: ObjectId; }) => {
+        element._id = new ObjectId();
+      });
       data[key] = { $each: data[key] };
-    })
+    });
     return (await this.collection
       .findOneAndUpdate(query, { $push: data }, { returnDocument: 'after' }));
   }

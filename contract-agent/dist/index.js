@@ -530,9 +530,9 @@ var Agent = class _Agent {
         Logger.warn("No configuration found. No data providers added.");
         return;
       }
-      const providerType = DataProvider.childType;
+      const providerType = DataProvider.getChildType();
       if (typeof providerType !== "function") {
-        throw new Error("Invalid DataProvider type");
+        throw new TypeError("Invalid DataProvider type");
       }
       for (const dpConfig of this.config.dataProviderConfig) {
         try {
@@ -631,7 +631,16 @@ var _MongoDBProvider = class _MongoDBProvider extends DataProvider {
   constructor(config) {
     super(config.source);
     this.dbName = config.dbName;
-    this.connectionPromise = this.connectToDatabase(config.url);
+    this.url = config.url;
+  }
+  /**
+   * Connects to the database on first call and reuses the same connection afterwards
+   * @returns Promise resolving to the database
+   */
+  connect() {
+    var _a;
+    (_a = this.connectionPromise) != null ? _a : this.connectionPromise = this.connectToDatabase(this.url);
+    return this.connectionPromise;
   }
   getClient() {
     return this.client;
@@ -685,7 +694,7 @@ var _MongoDBProvider = class _MongoDBProvider extends DataProvider {
   }
   ensureReady(collection) {
     return __async(this, null, function* () {
-      yield this.connectionPromise;
+      yield this.connect();
       this.collection = _MongoDBProvider.createCollectionProxy(
         collection || this.db.collection(this.dataSource)
       );
@@ -947,8 +956,10 @@ var _MongoDBProvider = class _MongoDBProvider extends DataProvider {
   findOneAndPush(criteria, data) {
     return __async(this, null, function* () {
       const query = this.makeQuery(criteria.conditions);
-      Object.keys(data).map((key) => {
-        data[key].map((element) => element._id = new import_mongodb.ObjectId());
+      Object.keys(data).forEach((key) => {
+        data[key].forEach((element) => {
+          element._id = new import_mongodb.ObjectId();
+        });
         data[key] = { $each: data[key] };
       });
       return yield this.collection.findOneAndUpdate(query, { $push: data }, { returnDocument: "after" });
@@ -1400,12 +1411,14 @@ var _ContractAgent = class _ContractAgent extends Agent {
    * @param data - Data change event
    */
   handleDataDeleted(data) {
-    var _a;
-    if (data.source === "contracts") {
-      Logger.info(`Removing contract: ${(_a = data.documentKey) == null ? void 0 : _a._id}`);
-    } else {
-      Logger.info(`Unhandled data deletion for source: ${data.source}`);
-    }
+    return __async(this, null, function* () {
+      var _a;
+      if (data.source === "contracts") {
+        Logger.info(`Removing contract: ${(_a = data.documentKey) == null ? void 0 : _a._id}`);
+      } else {
+        Logger.info(`Unhandled data deletion for source: ${data.source}`);
+      }
+    });
   }
   /**
    * Updates matching information for a profile
@@ -2134,6 +2147,9 @@ router2.delete(
 );
 var agent_contract_profile_router_default = router2;
 
+// src/agent.consent.router.ts
+var import_express3 = require("express");
+
 // src/ChangeStreamDataProvider.ts
 var import_mongodb2 = require("mongodb");
 var MongoInterceptor2 = class _MongoInterceptor {
@@ -2163,7 +2179,16 @@ var _ChangeStreamDataProvider = class _ChangeStreamDataProvider extends DataProv
   constructor(config) {
     super(config.source);
     this.dbName = config.dbName;
-    this.connectionPromise = this.connectToDatabase(config.url);
+    this.url = config.url;
+  }
+  /**
+   * Connects to the database on first call and reuses the same connection afterwards
+   * @returns Promise resolving to the database
+   */
+  connect() {
+    var _a;
+    (_a = this.connectionPromise) != null ? _a : this.connectionPromise = this.connectToDatabase(this.url);
+    return this.connectionPromise;
   }
   connectToDatabase(url) {
     return __async(this, null, function* () {
@@ -2211,7 +2236,7 @@ var _ChangeStreamDataProvider = class _ChangeStreamDataProvider extends DataProv
   }
   ensureReady() {
     return __async(this, null, function* () {
-      yield this.connectionPromise;
+      yield this.connect();
       this.collection = _ChangeStreamDataProvider.createCollectionProxy(
         this.db.collection(this.dataSource)
       );
@@ -2425,8 +2450,10 @@ var _ChangeStreamDataProvider = class _ChangeStreamDataProvider extends DataProv
   findOneAndPush(criteria, data) {
     return __async(this, null, function* () {
       const query = this.makeQuery(criteria.conditions);
-      Object.keys(data).map((key) => {
-        data[key].map((element) => element._id = new import_mongodb2.ObjectId());
+      Object.keys(data).forEach((key) => {
+        data[key].forEach((element) => {
+          element._id = new import_mongodb2.ObjectId();
+        });
         data[key] = { $each: data[key] };
       });
       return yield this.collection.findOneAndUpdate(query, { $push: data }, { returnDocument: "after" });
@@ -2445,6 +2472,7 @@ var ChangeStreamDataProvider = _ChangeStreamDataProvider;
 // src/ConsentAgent.ts
 var import_axios = __toESM(require("axios"));
 var import_mongodb3 = require("mongodb");
+var WITHDRAWN_CONSENT_STATUSES = ["revoked", "refused", "terminated"];
 var _ConsentAgent = class _ConsentAgent extends Agent {
   constructor() {
     super();
@@ -2520,7 +2548,7 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
         });
       } catch (error) {
         Logger.error(`Error while finding profile: ${error.message}`);
-        throw new Error();
+        throw new Error("Failed to find profiles");
       }
     });
   }
@@ -2545,7 +2573,7 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
         });
       } catch (error) {
         Logger.error(`Error while finding profile: ${error.message}`);
-        throw new Error();
+        throw new Error("Failed to find profile");
       }
     });
   }
@@ -2573,7 +2601,7 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
         });
       } catch (error) {
         Logger.error(`Error while finding profile: ${error.message}`);
-        throw new Error();
+        throw new Error("Failed to update profile");
       }
     });
   }
@@ -2601,7 +2629,7 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
         });
       } catch (error) {
         Logger.error(`Error while finding profile: ${error.message}`);
-        throw new Error();
+        throw new Error("Failed to push data to profile");
       }
     });
   }
@@ -2629,7 +2657,7 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
         });
       } catch (error) {
         Logger.error(`Error while finding profile: ${error.message}`);
-        throw new Error();
+        throw new Error("Failed to pull data from profile");
       }
     });
   }
@@ -2709,12 +2737,12 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
   handleDataUpdated(data) {
     return __async(this, null, function* () {
       var _a, _b;
-      if (data.updateDescription && data.updateDescription.updatedFields && data.updateDescription.updatedFields instanceof Object) {
+      if (((_a = data.updateDescription) == null ? void 0 : _a.updatedFields) instanceof Object) {
         switch (data.source) {
           case "users":
             {
               try {
-                if (data.updateDescription.updatedFields.identifiers) yield this.handleNewIdentifier({ _id: (_a = data.documentKey) == null ? void 0 : _a._id });
+                if (data.updateDescription.updatedFields.identifiers) yield this.handleNewIdentifier({ _id: (_b = data.documentKey) == null ? void 0 : _b._id });
                 Logger.info(`Data updated for source: ${data.source}`);
               } catch (error) {
                 Logger.error(
@@ -2727,10 +2755,7 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
           case "consents":
             {
               try {
-                const { updatedFields } = data.updateDescription;
-                if (updatedFields.status && (updatedFields.status === "revoked" || updatedFields.status === "refused" || updatedFields.status === "terminated")) {
-                  yield this.handleRemoveConsent({ _id: (_b = data.documentKey) == null ? void 0 : _b._id });
-                }
+                yield this.handleConsentStatusUpdate(data);
                 Logger.info(`Data updated for source: ${data.source}`);
               } catch (error) {
                 Logger.error(
@@ -2743,6 +2768,19 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
         }
       } else {
         Logger.info(`Unhandled data for source: ${data.source}`);
+      }
+    });
+  }
+  /**
+   * Removes a consent from the profiles when its status becomes withdrawn
+   * @param data - Data change event on a consent
+   */
+  handleConsentStatusUpdate(data) {
+    return __async(this, null, function* () {
+      var _a;
+      const { updatedFields } = data.updateDescription;
+      if (WITHDRAWN_CONSENT_STATUSES.includes(updatedFields.status)) {
+        yield this.handleRemoveConsent({ _id: (_a = data.documentKey) == null ? void 0 : _a._id });
       }
     });
   }
@@ -3175,7 +3213,6 @@ var ConsentAgent = _ConsentAgent;
 var import_mongodb4 = require("mongodb");
 var _ConsentAgentRequestHandler = class _ConsentAgentRequestHandler {
   constructor() {
-    this.profilesHost = "";
   }
   static retrieveService() {
     return __async(this, null, function* () {
@@ -3547,24 +3584,7 @@ var _ConsentAgentRequestHandler = class _ConsentAgentRequestHandler {
         asDataProvider,
         asServiceProvider
       } = params;
-      if (category && participant) {
-        throw new Error(
-          "Cannot use both category and participant simultaneously."
-        );
-      }
-      if (!category && !participant) {
-        throw new Error("At least one of category or participant must be true.");
-      }
-      if (asDataProvider && asServiceProvider) {
-        throw new Error(
-          "Cannot use both asDataProvider and asServiceProvider simultaneously."
-        );
-      }
-      if (!asDataProvider && !asServiceProvider) {
-        throw new Error(
-          "At least one of asDataProvider or asServiceProvider must be true."
-        );
-      }
+      _ConsentAgentRequestHandler.validatePreferenceMatchParams(params);
       yield this.prepare();
       const criteria = {
         conditions: [
@@ -3620,6 +3640,33 @@ var _ConsentAgentRequestHandler = class _ConsentAgentRequestHandler {
     });
   }
   /**
+   * Validates that exactly one of category/participant and exactly one of
+   * asDataProvider/asServiceProvider are provided.
+   * @param params - The preference match parameters
+   * @throws {Error} If the parameters are inconsistent
+   */
+  static validatePreferenceMatchParams(params) {
+    const { category, participant, asDataProvider, asServiceProvider } = params;
+    if (category && participant) {
+      throw new Error(
+        "Cannot use both category and participant simultaneously."
+      );
+    }
+    if (!category && !participant) {
+      throw new Error("At least one of category or participant must be true.");
+    }
+    if (asDataProvider && asServiceProvider) {
+      throw new Error(
+        "Cannot use both asDataProvider and asServiceProvider simultaneously."
+      );
+    }
+    if (!asDataProvider && !asServiceProvider) {
+      throw new Error(
+        "At least one of asDataProvider or asServiceProvider must be true."
+      );
+    }
+  }
+  /**
    * This function checks if the authorization matches the current day and location.
    * 
    * @param authorization - The authorization object to check.
@@ -3655,7 +3702,6 @@ _ConsentAgentRequestHandler.instance = null;
 var ConsentAgentRequestHandler = _ConsentAgentRequestHandler;
 
 // src/agent.consent.router.ts
-var import_express3 = require("express");
 var router3 = (0, import_express3.Router)();
 router3.get(
   "/profile/:profileId/preferences/match",

@@ -10,15 +10,13 @@ import {
   AuthorizationLevelEnum,
   ConsentProfileRecommendation,
 } from './types';
-import {  ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 // Request Handler
 export class ConsentAgentRequestHandler {
   private consentAgent?: ConsentAgent;
 
   private static instance: ConsentAgentRequestHandler | null = null;
-  private contractAgent?: ConsentAgent;
-  private profilesHost: string = '';
   private constructor() {}
 
   static async retrieveService(): Promise<ConsentAgentRequestHandler> {
@@ -263,7 +261,6 @@ export class ConsentAgentRequestHandler {
    * Update the profile's preference
    * @param {string} profileURL - URL of the profile
    * @param {string} preferenceId - ID of the preference
-   * @param {PreferencePayload} data - Data to update
    * @return Promise<ProfilePreference[]>
    */
   async deletePreferenceByIdFromProfile(
@@ -393,15 +390,10 @@ export class ConsentAgentRequestHandler {
 
   /**
    * Checks if the given parameters match the preferences of a profile.
-   * 
-   * @param {string} profileId - The ID of the profile to check preferences for.
-   * @param {string} category - The category to match preferences against.
-   * @param {string} participant - The participant to match preferences against.
-   * @param {string} location - The location to match preferences against.
-   * @param {boolean} asDataProvider - Indicates if the check is for a data provider role.
-   * @param {boolean} asServiceProvider - Indicates if the check is for a service provider role.
-   * 
+   *
+   *
    * @returns {Promise<boolean>} A promise that resolves to a boolean indicating if the preferences match.
+   * @param params
    */
   async checkPreferenceMatch(params: {
     profileId: string;
@@ -420,27 +412,7 @@ export class ConsentAgentRequestHandler {
       asServiceProvider,
     } = params;
 
-    if (category && participant) {
-      throw new Error(
-        'Cannot use both category and participant simultaneously.',
-      );
-    }
-
-    if (!category && !participant) {
-      throw new Error('At least one of category or participant must be true.');
-    }
-
-    if (asDataProvider && asServiceProvider) {
-      throw new Error(
-        'Cannot use both asDataProvider and asServiceProvider simultaneously.',
-      );
-    }
-
-    if (!asDataProvider && !asServiceProvider) {
-      throw new Error(
-        'At least one of asDataProvider or asServiceProvider must be true.',
-      );
-    }
+    ConsentAgentRequestHandler.validatePreferenceMatchParams(params);
 
     await this.prepare();
     const criteria: SearchCriteria = {
@@ -503,6 +475,43 @@ export class ConsentAgentRequestHandler {
     }
 
     return true;
+  }
+
+  /**
+   * Validates that exactly one of category/participant and exactly one of
+   * asDataProvider/asServiceProvider are provided.
+   * @param params - The preference match parameters
+   * @throws {Error} If the parameters are inconsistent
+   */
+  private static validatePreferenceMatchParams(params: {
+    category?: string;
+    participant?: string;
+    asDataProvider?: boolean;
+    asServiceProvider?: boolean;
+  }): void {
+    const { category, participant, asDataProvider, asServiceProvider } = params;
+
+    if (category && participant) {
+      throw new Error(
+        'Cannot use both category and participant simultaneously.',
+      );
+    }
+
+    if (!category && !participant) {
+      throw new Error('At least one of category or participant must be true.');
+    }
+
+    if (asDataProvider && asServiceProvider) {
+      throw new Error(
+        'Cannot use both asDataProvider and asServiceProvider simultaneously.',
+      );
+    }
+
+    if (!asDataProvider && !asServiceProvider) {
+      throw new Error(
+        'At least one of asDataProvider or asServiceProvider must be true.',
+      );
+    }
   }
 
   /**

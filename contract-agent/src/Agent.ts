@@ -9,10 +9,6 @@ import {
   Provider,
   DataProviderConfig,
   DataChangeEvent,
-  ProfileDocument,
-  ContractAgentError,
-  CAECode,
-  FilterOperator,
   ConsentProfileRecommendation,
 } from './types';
 import path from 'path';
@@ -77,7 +73,7 @@ export abstract class Agent {
   // eslint-disable-next-line no-unused-vars
   protected abstract handleDataUpdated(data: DataChangeEvent): Promise<void>;
   // eslint-disable-next-line no-unused-vars
-  protected abstract handleDataDeleted(data: DataChangeEvent): void;
+  protected abstract handleDataDeleted(data: DataChangeEvent): Promise<void>;
 
   abstract findProfiles(
     // eslint-disable-next-line no-unused-vars
@@ -109,9 +105,9 @@ export abstract class Agent {
       Logger.warn('No configuration found. No data providers added.');
       return;
     }
-    const providerType = DataProvider.childType;
+    const providerType = DataProvider.getChildType();
     if (typeof providerType !== 'function') {
-      throw new Error('Invalid DataProvider type');
+      throw new TypeError('Invalid DataProvider type');
     }
     for (const dpConfig of this.config.dataProviderConfig) {
       try {

@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import sinon from 'sinon';
 import mongoose from 'mongoose';
 import { ContractAgent } from '../ContractAgent';
@@ -12,14 +11,13 @@ describe('ContractAgent with MongooseProvider', function () {
 
   this.timeout(10000);
 
-  let agent: ContractAgent;
   let model: mongoose.Model<any>;
   let updateProfileFromContractChangeSpy: sinon.SinonSpy;
 
   before(async function () {
     Agent.setConfigPath('./mocks/contract-agent.config.json', __filename);
     model = await ContractModel.getModel();
-    agent = await ContractAgent.retrieveService(MongooseProvider);
+    await ContractAgent.retrieveService(MongooseProvider);
 
     updateProfileFromContractChangeSpy = sinon.spy(
       ContractAgent.prototype as any,

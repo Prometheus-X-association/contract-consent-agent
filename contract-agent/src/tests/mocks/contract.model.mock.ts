@@ -150,8 +150,6 @@ const ContractSchema: Schema = new Schema(
   },
 );
 
-// export default mongoose.model<IContract>('Contract', ContractSchema);
-
 const config = {
   useProvider: true,
 };
