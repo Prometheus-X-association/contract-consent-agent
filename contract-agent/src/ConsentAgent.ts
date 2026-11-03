@@ -18,7 +18,7 @@ import axios from 'axios';
 import { ObjectId } from 'mongodb';
 
 /** Consent statuses for which the consent is withdrawn from the profiles */
-const WITHDRAWN_CONSENT_STATUSES = ['revoked', 'refused', 'terminated'];
+const WITHDRAWN_CONSENT_STATUSES = new Set(['revoked', 'refused', 'terminated']);
 
 export class ConsentAgent extends Agent {
   private static instance: ConsentAgent | null = null;
@@ -345,7 +345,7 @@ export class ConsentAgent extends Agent {
   private async handleConsentStatusUpdate(data: DataChangeEvent): Promise<void> {
     const { updatedFields } = data.updateDescription as any;
     //watch for revoked consent
-    if (WITHDRAWN_CONSENT_STATUSES.includes(updatedFields.status)) {
+    if (WITHDRAWN_CONSENT_STATUSES.has(updatedFields.status)) {
       //update profiles
       //remove element from profiles
       await this.handleRemoveConsent({ _id: data.documentKey?._id });

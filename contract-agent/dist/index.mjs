@@ -2433,7 +2433,7 @@ var ChangeStreamDataProvider = _ChangeStreamDataProvider;
 // src/ConsentAgent.ts
 import axios from "axios";
 import { ObjectId as ObjectId3 } from "mongodb";
-var WITHDRAWN_CONSENT_STATUSES = ["revoked", "refused", "terminated"];
+var WITHDRAWN_CONSENT_STATUSES = /* @__PURE__ */ new Set(["revoked", "refused", "terminated"]);
 var _ConsentAgent = class _ConsentAgent extends Agent {
   constructor() {
     super();
@@ -2740,7 +2740,7 @@ var _ConsentAgent = class _ConsentAgent extends Agent {
     return __async(this, null, function* () {
       var _a;
       const { updatedFields } = data.updateDescription;
-      if (WITHDRAWN_CONSENT_STATUSES.includes(updatedFields.status)) {
+      if (WITHDRAWN_CONSENT_STATUSES.has(updatedFields.status)) {
         yield this.handleRemoveConsent({ _id: (_a = data.documentKey) == null ? void 0 : _a._id });
       }
     });
@@ -3404,7 +3404,6 @@ var _ConsentAgentRequestHandler = class _ConsentAgentRequestHandler {
    * Update the profile's preference
    * @param {string} profileURL - URL of the profile
    * @param {string} preferenceId - ID of the preference
-   * @param {PreferencePayload} data - Data to update
    * @return Promise<ProfilePreference[]>
    */
   deletePreferenceByIdFromProfile(profileURL, preferenceId) {
@@ -3525,15 +3524,10 @@ var _ConsentAgentRequestHandler = class _ConsentAgentRequestHandler {
   }
   /**
    * Checks if the given parameters match the preferences of a profile.
-   * 
-   * @param {string} profileId - The ID of the profile to check preferences for.
-   * @param {string} category - The category to match preferences against.
-   * @param {string} participant - The participant to match preferences against.
-   * @param {string} location - The location to match preferences against.
-   * @param {boolean} asDataProvider - Indicates if the check is for a data provider role.
-   * @param {boolean} asServiceProvider - Indicates if the check is for a service provider role.
-   * 
+   *
+   *
    * @returns {Promise<boolean>} A promise that resolves to a boolean indicating if the preferences match.
+   * @param params
    */
   checkPreferenceMatch(params) {
     return __async(this, null, function* () {
