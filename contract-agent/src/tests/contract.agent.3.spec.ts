@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import mongoose from 'mongoose';
 import { MongooseProvider } from '../MongooseProvider';
 import ContractModel, { IContract } from './mocks/contract.model.mock';
-import { Logger } from '../Logger';
 
 describe('MongooseProvider Events Tests', () => {
   let provider: MongooseProvider;

@@ -42,18 +42,6 @@ async function fetchProfileById(profileId: string): Promise<Profile> {
 router.post(
   '/negotiation/contract/acceptance',
   async (req: Request, res: Response) => {
-    /*    #swagger.tags = ['Negotiation']
-          #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        $ref: "#/components/schemas/ContractPayload"
-                    }  
-                }
-            }
-        } 
-    */
     try {
       const { profileId, contractData } = req.body;
       const profile = await fetchProfileById(profileId);
@@ -76,18 +64,6 @@ router.post(
 router.post(
   '/negotiation/policy/acceptance',
   async (req: Request, res: Response) => {
-    /*    #swagger.tags = ['Negotiation']
-          #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        $ref: "#/components/schemas/PolicyPayload"
-                    }  
-                }
-            }
-        } 
-    */
     try {
       const { profileId, policyData } = req.body;
       const profile = await fetchProfileById(profileId);
@@ -113,18 +89,6 @@ router.post(
 router.post(
   '/negotiation/service/acceptance',
   async (req: Request, res: Response) => {
-    /*    #swagger.tags = ['Negotiation']
-          #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        $ref: "#/components/schemas/ServiceOfferingPayload"
-                    }  
-                }
-            }
-        } 
-    */
     try {
       const { profileId, serviceData } = req.body;
       const profile = await fetchProfileById(profileId);
@@ -150,18 +114,6 @@ router.post(
 router.post(
   '/negotiation/contract/negotiate',
   async (req: Request, res: Response) => {
-    /*    #swagger.tags = ['Negotiation']
-          #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        $ref: "#/components/schemas/ContractPayload"
-                    }  
-                }
-            }
-        } 
-    */
     try {
       const { profileId, contractData } = req.body;
       const profile = await fetchProfileById(profileId);
@@ -187,18 +139,6 @@ router.post(
 router.put(
   '/negotiation/profile/preferences',
   async (req: Request, res: Response) => {
-    /*    #swagger.tags = ['Negotiation']
-          #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        $ref: "#/components/schemas/ProfilePreferencePayload"
-                    }  
-                }
-            }
-        } 
-    */
     try {
       const { profileId, preferences } = req.body;
       const profile = await fetchProfileById(profileId);

@@ -3,7 +3,6 @@ import sinon, { SinonSpy } from 'sinon';
 import { expect } from 'chai';
 import router from '../agent.consent.router';
 import { Agent } from '../Agent';
-import mongoose from 'mongoose';
 import { MongoMemoryReplSet  } from 'mongodb-memory-server';
 import fs from 'fs';
 import path from 'path';

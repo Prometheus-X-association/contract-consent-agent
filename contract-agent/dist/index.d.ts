@@ -9,12 +9,10 @@ declare const router$1: Router;
 
 declare const router: Router;
 
-type DataProviderType = {
-    new (...args: any[]): DataProvider;
-};
+type DataProviderType = new (...args: any[]) => DataProvider;
 declare abstract class DataProvider extends EventEmitter {
     dataSource: string;
-    static childType?: DataProviderType;
+    private static childType?;
     constructor(dataSource: string);
     abstract find(criteria: SearchCriteria): Promise<[]>;
     abstract findAll(): Promise<any[]>;
@@ -191,7 +189,7 @@ declare abstract class Agent {
     getDataProvider(source: string): DataProvider;
     protected abstract handleDataInserted(data: DataChangeEvent): Promise<void>;
     protected abstract handleDataUpdated(data: DataChangeEvent): Promise<void>;
-    protected abstract handleDataDeleted(data: DataChangeEvent): void;
+    protected abstract handleDataDeleted(data: DataChangeEvent): Promise<void>;
     abstract findProfiles(source: string, criteria: SearchCriteria): Promise<Profile[]>;
     protected abstract existingDataCheck(): Promise<void>;
     addDataProviders(dataProviders: Provider[]): void;
@@ -225,7 +223,7 @@ interface LoggerConfig {
  * Logger class for logging messages to the console and optionally to disk.
  */
 declare class Logger {
-    private static noPrint;
+    private static readonly noPrint;
     private static config;
     /**
      * Configures the logger with the provided options.
@@ -345,7 +343,7 @@ declare class ContractAgent extends Agent {
      * Handles deleted data events
      * @param data - Data change event
      */
-    protected handleDataDeleted(data: DataChangeEvent): void;
+    protected handleDataDeleted(data: DataChangeEvent): Promise<void>;
     /**
      * Updates matching information for a profile
      * @param profile - Profile instance
@@ -451,6 +449,11 @@ declare class ConsentAgent extends Agent {
      */
     protected handleDataUpdated(data: DataChangeEvent): Promise<void>;
     /**
+     * Removes a consent from the profiles when its status becomes withdrawn
+     * @param data - Data change event on a consent
+     */
+    private handleConsentStatusUpdate;
+    /**
      * Handles data deletion events.
      * @param data - Data change event.
      */
@@ -540,13 +543,19 @@ declare class ConsentAgent extends Agent {
 
 declare class MongoDBProvider extends DataProvider {
     findAll(): Promise<any[]>;
-    private static connections;
+    private static readonly connections;
     private db?;
     private client?;
     private collection;
-    private dbName;
+    private readonly dbName;
+    private readonly url;
     private connectionPromise?;
     constructor(config: DataProviderConfig);
+    /**
+     * Connects to the database on first call and reuses the same connection afterwards
+     * @returns Promise resolving to the database
+     */
+    private connect;
     getClient(): MongoClient | undefined;
     getCollection(): Collection<Document>;
     private connectToDatabase;
@@ -571,15 +580,13 @@ declare class MongooseProvider extends DataProvider {
     findOneAndUpdate(criteria: SearchCriteria, data: any): Promise<any>;
     findOneAndPush(criteria: SearchCriteria, data: any): Promise<any>;
     findOneAndPull(criteria: SearchCriteria, data: any): Promise<any>;
-    private static connections;
-    private static externalModels;
-    private static instances;
-    private connection?;
+    private static readonly connections;
+    private static readonly externalModels;
+    private static readonly instances;
     private model;
-    private dbName;
-    private connectionPromise?;
-    private url;
-    private mongoosePromise;
+    private readonly dbName;
+    private readonly url;
+    private readonly mongoosePromise;
     private mongoosePromiseResolve;
     constructor(config: DataProviderConfig);
     static setCollectionModel<T extends Document$1>(source: string, schema: Schema): void;

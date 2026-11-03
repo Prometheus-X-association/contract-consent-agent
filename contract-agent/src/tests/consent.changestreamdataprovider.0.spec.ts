@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 
 class AgentTest {
-  private dataProvider: ChangeStreamDataProvider;
+  private readonly dataProvider: ChangeStreamDataProvider;
   public handleDataInsertedSpy: SinonSpy;
   public handleDataUpdatedSpy: SinonSpy;
   public handleDataDeletedSpy: SinonSpy;

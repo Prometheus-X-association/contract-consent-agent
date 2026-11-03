@@ -7,14 +7,13 @@ import {
   DataProviderConfig,
 } from './types';
 import { Logger } from './Logger';
-import { setTimeout, clearTimeout } from 'timers';
 import { ProfileSchema } from './Profile';
 
 type DocumentChangeHandler = (collectionName: string, document: any) => void;
 
 class MongooseInterceptor {
   private static instance: MongooseInterceptor;
-  private callbacks: Map<string, DocumentChangeHandler[]>;
+  private readonly callbacks: Map<string, DocumentChangeHandler[]>;
 
   private constructor() {
     this.callbacks = new Map();
@@ -65,16 +64,14 @@ export class MongooseProvider extends DataProvider {
   findOneAndPull(criteria: SearchCriteria, data: any): Promise<any> {
     throw new Error('Method not implemented.');
   }
-  private static connections: Map<string, Connection | undefined> = new Map();
-  private static externalModels: Map<string, Schema> = new Map();
-  private static instances: Map<string, MongooseProvider> = new Map();
-  private connection?: Connection;
+  private static readonly connections: Map<string, Connection | undefined> = new Map();
+  private static readonly externalModels: Map<string, Schema> = new Map();
+  private static readonly instances: Map<string, MongooseProvider> = new Map();
   private model!: Model<any>;
-  private dbName: string;
-  private connectionPromise?: Promise<void>;
-  private url: string;
+  private readonly dbName: string;
+  private readonly url: string;
 
-  private mongoosePromise: Promise<void>;
+  private readonly mongoosePromise: Promise<void>;
   private mongoosePromiseResolve: (() => void) | null = null;
 
   constructor(config: DataProviderConfig) {
@@ -275,11 +272,6 @@ export class MongooseProvider extends DataProvider {
 
   async create(data: Document): Promise<Document> {
     try {
-      /*
-      if (!this.model || !this.connection?.readyState) {
-        await this.ensureReady();
-      }
-      */
       return await this.model.create(data);
     } catch (error) {
       Logger.error(

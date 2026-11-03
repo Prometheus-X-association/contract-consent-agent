@@ -5,7 +5,7 @@ import { FilterOperator, SearchCriteria } from '../types';
 import { Logger } from '../Logger';
 
 class AgentTest {
-  private dataProvider: MongoDBProvider;
+  private readonly dataProvider: MongoDBProvider;
   public handleDataInsertedSpy: SinonSpy;
   public handleDataUpdatedSpy: SinonSpy;
   public handleDataDeletedSpy: SinonSpy;

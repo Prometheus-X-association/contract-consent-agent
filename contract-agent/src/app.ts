@@ -1,14 +1,15 @@
 import express, { Application } from 'express';
-import * as bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
 import profileRoutes from './agent.contract.profile.router';
-import negotiationRoutes from './agent.contract.negotation.router';
+import negotiationRoutes from './agent.contract.negotiation.router';
 import consentRoutes from './agent.consent.router';
-import swaggerDocument from './swagger/swagger_output.json';
+import swaggerDocument from '../docs/swagger.json';
 
 const app : Application= express();
 
-app.use(bodyParser.json());
+// Do not disclose the framework in the X-Powered-By header
+app.disable('x-powered-by');
+app.use(express.json());
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -22,7 +23,7 @@ const PORT = 3000;
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-undef
-  console.log('Server started at port 8080');
+  console.log(`Server started at port ${PORT}`);
   // eslint-disable-next-line no-undef
   console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
 });
