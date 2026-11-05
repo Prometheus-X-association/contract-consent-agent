@@ -9,7 +9,7 @@
 
 ## Maintenance Commitment
 
-Visions commits to maintaining the Data Processing Chain Protocol for a period of **12 months following the official end of the project**.
+Visions commits to maintaining the Contract Consent Agent (CCA) for a period of **12 months following the official end of the project**.
 
 - **Status during this period:** Actively maintained
 
